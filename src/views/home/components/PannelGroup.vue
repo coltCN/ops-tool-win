@@ -4,7 +4,10 @@
       <el-card>
         <div class="card-panel" @click="goTo('DumpUtil')">
           <div class="card-panel-icon-wrapper icon-people">
-            <svg-icon icon-class="peoples" class-name="card-panel-icon" />
+            <svg-icon
+              icon-class="database-center"
+              class-name="card-panel-icon"
+            />
           </div>
           <div class="card-panel-description">
             <div class="card-panel-text">MySql Dump 文件提取</div>

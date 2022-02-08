@@ -1,8 +1,12 @@
 <template>
   <div>导出工具</div>
-  <div>
-    <el-button type="primary" @click="openFile">打开</el-button>
-    <el-button type="primary" @click="extract">提取</el-button>
+  <div class="icon-btn-group">
+    <span class="icon-btn icon-primary" @click="openFile">
+      <svg-icon icon-class="folder-open" />
+    </span>
+    <span class="icon-btn icon-danger" @click="extract">
+      <svg-icon icon-class="save" />
+    </span>
   </div>
   <el-table :data="dbData" @selection-change="handleSelectionChange">
     <el-table-column type="selection" width="50"></el-table-column>
@@ -52,3 +56,19 @@ const extract = () => {
   }
 }
 </script>
+<style lang="scss" scoped>
+.icon-btn-group {
+  .icon-btn {
+    display: inline-block;
+    margin: 0 10px;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  .icon-primary {
+    color: var(--el-color-primary);
+  }
+  .icon-danger {
+    color: var(--el-color-danger);
+  }
+}
+</style>
