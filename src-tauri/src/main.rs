@@ -10,14 +10,14 @@ fn open_file(path: &str) -> String {
   format!("准备打开文件:{}", path)
 }
 #[tauri::command]
-fn list_db(path: &str) -> Vec<String> {
-  let dump = Dumpfile::new(path).unwrap();
-  dump.list_db().unwrap()
+fn list_db(path: &str) -> Result<Vec<String>, String> {
+  let mut dump = Dumpfile::new(path).unwrap();
+  dump.list_db().map_err(|e| e.to_string())
 }
 #[tauri::command]
-fn extract_dumpfile(path: &str, save_dir: &str, db_list: Vec<String>) {
-  let dump = Dumpfile::new(path).unwrap();
-  dump.extract(save_dir, db_list).unwrap();
+fn extract_dumpfile(path: &str, save_dir: &str, db_list: Vec<String>) -> Result<(), String> {
+  let mut dump = Dumpfile::new(path).unwrap();
+  dump.extract(save_dir, db_list).map_err(|e| e.to_string())
 }
 
 fn main() {

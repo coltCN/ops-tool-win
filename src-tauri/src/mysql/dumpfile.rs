@@ -1,3 +1,4 @@
+use flate2::read::GzDecoder;
 use lazy_static::lazy_static;
 use std::{
   cell::RefCell,
@@ -18,10 +19,16 @@ impl Dumpfile {
   pub fn new(file: &str) -> Result<Self> {
     let path = Path::new(file);
     println!("当前文件扩展名: {:?}", path.extension());
+    let file = fs::File::open(path).expect("file not found!");
     match path.extension() {
-      Some(ext) if ext == ".sql" => {
-        let file = fs::File::open(path).expect("file not found!");
-        let mut reader = BufReader::new(file);
+      Some(ext) if ext == "sql" => {
+        let reader = BufReader::new(file);
+        Ok(Self {
+          reader: Box::new(reader),
+        })
+      }
+      Some(ext) if ext == "gz" => {
+        let reader = BufReader::new(GzDecoder::new(file));
         Ok(Self {
           reader: Box::new(reader),
         })
@@ -31,14 +38,14 @@ impl Dumpfile {
   }
 
   /// 从备份文件中提取指定数据库内容
-  pub fn extract(&self, save_path: &str, db_list: Vec<String>) -> Result<()> {
+  pub fn extract(&mut self, save_path: &str, db_list: Vec<String>) -> Result<()> {
     // let reader = BufReader::new(file);
 
     lazy_static! {
       static ref RE: Regex = Regex::new(r"^-- Current Database: `(.*)`").unwrap();
     }
     let mut writer_warp: Option<Rc<RefCell<BufWriter<File>>>> = None;
-    for line in self.reader.lines() {
+    for line in self.reader.as_mut().lines() {
       if let Ok(text) = line {
         if let Some(cap) = RE.captures(&text) {
           if db_list.contains(&cap[1].to_string()) {
@@ -61,7 +68,7 @@ impl Dumpfile {
   }
 
   /// 列出所有的数据库名称
-  pub fn list_db(&self) -> Result<Vec<String>> {
+  pub fn list_db(&mut self) -> Result<Vec<String>> {
     let mut dbs = Vec::new();
     // let path = Path::new(&self.file);
     // let file = fs::File::open(&path)?;
@@ -70,14 +77,28 @@ impl Dumpfile {
     lazy_static! {
       static ref RE: Regex = Regex::new(r"^-- Current Database: `(.*)`").unwrap();
     }
-    for line in self.reader.lines() {
-      if let Ok(line) = line {
-        if let Some(cap) = RE.captures(&line) {
-          dbs.push(cap[1].to_string());
+    //for line in self.reader.as_mut().lines() {
+    //  if let Ok(line) = line {
+    //    if let Some(cap) = RE.captures(&line) {
+    //      dbs.push(cap[1].to_string());
+    //    }
+    //  }
+    //}
+
+    let mut line = String::new();
+    loop {
+      let result = self.reader.as_mut().read_line(&mut line);
+      match result {
+        Err(_) => continue,
+        Ok(mun) if mun == 0 => break,
+        _ => {
+          if let Some(cap) = RE.captures(&line) {
+            dbs.push(cap[1].to_string());
+          }
+          line.clear();
         }
       }
     }
-
     Ok(dbs)
   }
 }
