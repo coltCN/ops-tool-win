@@ -4,7 +4,6 @@
 )]
 
 use mysql::Dumpfile;
-
 mod mysql;
 #[tauri::command]
 fn open_file(path: &str) -> String {
@@ -12,13 +11,13 @@ fn open_file(path: &str) -> String {
 }
 #[tauri::command]
 fn list_db(path: &str) -> Vec<String> {
-  let dump = Dumpfile::new(path);
+  let dump = Dumpfile::new(path).unwrap();
   dump.list_db().unwrap()
 }
 #[tauri::command]
 fn extract_dumpfile(path: &str, save_dir: &str, db_list: Vec<String>) {
-  let dump = Dumpfile::new(path);
-  dump.extract(save_dir, db_list);
+  let dump = Dumpfile::new(path).unwrap();
+  dump.extract(save_dir, db_list).unwrap();
 }
 
 fn main() {
