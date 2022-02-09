@@ -9,7 +9,7 @@ mod mysql;
 fn open_file(path: &str) -> String {
   format!("准备打开文件:{}", path)
 }
-#[tauri::command]
+#[tauri::command(async)]
 fn list_db(path: &str) -> Result<Vec<String>, String> {
   let mut dump = Dumpfile::new(path).unwrap();
   dump.list_db().map_err(|e| e.to_string())

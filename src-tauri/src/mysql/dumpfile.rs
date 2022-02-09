@@ -6,6 +6,7 @@ use std::{
   io::{BufRead, BufReader, BufWriter, Write},
   path::Path,
   rc::Rc,
+  str,
 };
 
 use anyhow::{anyhow, Result};
@@ -77,25 +78,25 @@ impl Dumpfile {
     lazy_static! {
       static ref RE: Regex = Regex::new(r"^-- Current Database: `(.*)`").unwrap();
     }
-    //for line in self.reader.as_mut().lines() {
-    //  if let Ok(line) = line {
-    //    if let Some(cap) = RE.captures(&line) {
-    //      dbs.push(cap[1].to_string());
-    //    }
-    //  }
-    //}
 
-    let mut line = String::new();
+    let mut buf = vec![];
     loop {
-      let result = self.reader.as_mut().read_line(&mut line);
-      match result {
-        Err(_) => continue,
-        Ok(mun) if mun == 0 => break,
-        _ => {
-          if let Some(cap) = RE.captures(&line) {
-            dbs.push(cap[1].to_string());
+      buf.clear();
+      if let Ok(mun) = self.reader.as_mut().read_until(0xA, &mut buf) {
+        if mun == 0 {
+          break;
+        }
+        print!("#");
+        std::io::stdout().flush();
+        if buf.starts_with(b"-") {
+          if let Ok(line) = str::from_utf8(buf.as_slice()) {
+            if let Some(cap) = RE.captures(&line) {
+              println!("\n找到数据库: {}", cap[1].to_string());
+              dbs.push(cap[1].to_string());
+            }
+          } else {
+            println!("not uf-8");
           }
-          line.clear();
         }
       }
     }
