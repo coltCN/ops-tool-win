@@ -14,6 +14,11 @@ fn list_db(path: &str) -> Result<Vec<String>, String> {
   let mut dump = Dumpfile::new(path).unwrap();
   dump.list_db().map_err(|e| e.to_string())
 }
+#[tauri::command(async)]
+fn list_extract_dbs(path: &str) -> Result<Vec<String>, String> {
+  let mut dump = Dumpfile::new(path).unwrap();
+  dump.list_extract_dbs().map_err(|e| e.to_string())
+}
 #[tauri::command]
 fn extract_dumpfile(path: &str, save_dir: &str, db_list: Vec<String>) -> Result<(), String> {
   let mut dump = Dumpfile::new(path).unwrap();
@@ -25,7 +30,8 @@ fn main() {
     .invoke_handler(tauri::generate_handler![
       open_file,
       list_db,
-      extract_dumpfile
+      extract_dumpfile,
+      list_extract_dbs,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

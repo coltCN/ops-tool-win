@@ -37,7 +37,7 @@ const openFile = () => {
       return
     }
     file.value = path
-    invoke('list_db', { path }).then((dbList) => {
+    invoke('list_extract_dbs', { path }).then((dbList) => {
       dbData.value = dbList.map((v) => {
         return { name: v }
       })
