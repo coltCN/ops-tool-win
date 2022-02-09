@@ -8,14 +8,16 @@
         <svg-icon icon-class="save" />
       </span>
     </div>
-    <el-table
-      class="table"
-      :data="dbData"
-      @selection-change="handleSelectionChange"
-    >
-      <el-table-column type="selection" width="50"></el-table-column>
-      <el-table-column label="数据库" property="name"></el-table-column>
-    </el-table>
+    <div class="table">
+      <el-table
+        height="100%"
+        :data="dbData"
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="50"></el-table-column>
+        <el-table-column label="数据库" property="name"></el-table-column>
+      </el-table>
+    </div>
   </div>
 </template>
 <script setup>
@@ -39,7 +41,6 @@ const openFile = () => {
       dbData.value = dbList.map((v) => {
         return { name: v }
       })
-      console.log(dbData.value)
     })
   })
 }
@@ -67,7 +68,7 @@ const extract = () => {
   display: flex;
   flex-direction: column;
   .icon-btn-group {
-    height: 20px;
+    height: 30px;
     .icon-btn {
       display: inline-block;
       margin: 0 10px;
