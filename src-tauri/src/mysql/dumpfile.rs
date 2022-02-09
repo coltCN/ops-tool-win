@@ -86,8 +86,6 @@ impl Dumpfile {
         if mun == 0 {
           break;
         }
-        print!("#");
-        std::io::stdout().flush();
         if buf.starts_with(b"-") {
           if let Ok(line) = str::from_utf8(buf.as_slice()) {
             if let Some(cap) = RE.captures(&line) {

@@ -4,4 +4,8 @@ const children = {
 
 export default {
   children,
+  meta: {
+    title: 'Mysql Dump 文件提取',
+    icon: 'database-center',
+  },
 }

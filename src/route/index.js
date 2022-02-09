@@ -5,16 +5,19 @@ const constantRoutes = [
     path: '/',
     name: 'Home',
     component: () => import('~/views/home/index.vue'),
+    hidden: true,
   },
   {
     path: '/setting',
     name: 'Setting',
     component: () => import('~/views/Setting.vue'),
+    hidden: true,
   },
   {
     path: '/404',
     name: '404',
     component: () => import('~/views/error-page/404.vue'),
+    hidden: true,
   },
   { path: '/:pathMatch(.*)*', redirect: '/404' },
 ]
@@ -28,6 +31,7 @@ const routes = Object.keys(routeFiles).reduce((routes, path) => {
     path: `/${routeName}`,
     name: routeName,
     component: Layout,
+    meta: module.meta,
     children: Object.keys(module.children).map((child) => {
       return {
         path: child,

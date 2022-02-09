@@ -1,17 +1,22 @@
 <template>
-  <div>导出工具</div>
-  <div class="icon-btn-group">
-    <span class="icon-btn icon-primary" @click="openFile">
-      <svg-icon icon-class="folder-open" />
-    </span>
-    <span class="icon-btn icon-danger" @click="extract">
-      <svg-icon icon-class="save" />
-    </span>
+  <div class="dump-container">
+    <div class="icon-btn-group">
+      <span class="icon-btn icon-primary" @click="openFile">
+        <svg-icon icon-class="folder-open" />
+      </span>
+      <span class="icon-btn icon-danger" @click="extract">
+        <svg-icon icon-class="save" />
+      </span>
+    </div>
+    <el-table
+      class="table"
+      :data="dbData"
+      @selection-change="handleSelectionChange"
+    >
+      <el-table-column type="selection" width="50"></el-table-column>
+      <el-table-column label="数据库" property="name"></el-table-column>
+    </el-table>
   </div>
-  <el-table :data="dbData" @selection-change="handleSelectionChange">
-    <el-table-column type="selection" width="50"></el-table-column>
-    <el-table-column label="数据库" property="name"></el-table-column>
-  </el-table>
 </template>
 <script setup>
 import { ElButton, ElTable, ElTableColumn } from 'element-plus'
@@ -57,18 +62,27 @@ const extract = () => {
 }
 </script>
 <style lang="scss" scoped>
-.icon-btn-group {
-  .icon-btn {
-    display: inline-block;
-    margin: 0 10px;
-    font-size: 20px;
-    cursor: pointer;
+.dump-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  .icon-btn-group {
+    height: 20px;
+    .icon-btn {
+      display: inline-block;
+      margin: 0 10px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .icon-primary {
+      color: var(--el-color-primary);
+    }
+    .icon-danger {
+      color: var(--el-color-danger);
+    }
   }
-  .icon-primary {
-    color: var(--el-color-primary);
-  }
-  .icon-danger {
-    color: var(--el-color-danger);
+  .table {
+    flex: 1;
   }
 }
 </style>

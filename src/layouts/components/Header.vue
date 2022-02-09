@@ -1,6 +1,6 @@
 <template>
   <div class="header-panel">
-    <div class="title">工具箱</div>
+    <div class="title">{{ route.meta.title }}</div>
     <div class="button-group">
       <el-icon class="icon-button" :size="20" @click="goTo('Home')"
         ><home-filled
@@ -11,9 +11,10 @@
 <script setup>
 import { HomeFilled } from '@element-plus/icons-vue'
 import { ElIcon } from 'element-plus'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 const goTo = (name) => {
   router.push({ name })
 }
