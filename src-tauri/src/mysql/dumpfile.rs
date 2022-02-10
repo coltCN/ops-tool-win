@@ -37,7 +37,6 @@ impl Dumpfile {
   }
 
   /// 从备份文件中提取指定数据库内容
-  /// TODO: 需要修改lines 方法为 read_until
   pub fn extract(&mut self, save_path: &str, db_list: Vec<String>) -> Result<()> {
     // let reader = BufReader::new(file);
 
@@ -45,20 +44,29 @@ impl Dumpfile {
       static ref RE: Regex = Regex::new(r"^-- Current Database: `(.*)`").unwrap();
     }
     let mut writer_warp: Option<Box<BufWriter<File>>> = None;
-    for line in self.reader.as_mut().lines() {
-      if let Ok(text) = line {
-        if let Some(cap) = RE.captures(&text) {
-          if db_list.contains(&cap[1].to_string()) {
-            let out_file = fs::File::create(format!("{}/{}.sql", save_path, &cap[1]))?;
-            let writer = BufWriter::new(out_file);
-            writer_warp = Some(Box::new(writer));
-          } else {
-            writer_warp = None;
+    let mut buf = vec![];
+    loop {
+      buf.clear();
+      if let Ok(mun) = self.reader.as_mut().read_until(0xA, &mut buf) {
+        if mun == 0 {
+          break;
+        }
+        if buf.starts_with(b"-") {
+          if let Ok(line) = str::from_utf8(buf.as_slice()) {
+            if let Some(cap) = RE.captures(&line) {
+              // 检查当前数据库是不是 指定数据库，如果是，新建文件
+              if db_list.contains(&cap[1].to_string()) {
+                let out_file = fs::File::create(format!("{}/{}.sql", save_path, &cap[1]))?;
+                let writer = BufWriter::new(out_file);
+                writer_warp = Some(Box::new(writer));
+              } else {
+                writer_warp = None;
+              }
+            }
           }
         }
-
         if let Some(ref mut writer) = writer_warp {
-          writer.write(text.as_bytes())?;
+          writer.write(buf.as_slice())?;
           writer.write("\r\n".as_bytes())?;
         }
       }
