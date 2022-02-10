@@ -4,7 +4,7 @@
       <span class="icon-btn icon-primary" @click="openFile">
         <svg-icon icon-class="folder-open" />
       </span>
-      <span class="icon-btn icon-danger" @click="extract">
+      <span class="icon-btn icon-danger" @click="saveAs">
         <svg-icon icon-class="save" />
       </span>
     </div>
@@ -47,14 +47,13 @@ const openFile = () => {
 const handleSelectionChange = (val) => {
   selection.value = val.map((d) => d.name)
 }
-const extract = () => {
+const saveAs = () => {
   if (selection.value.length > 0) {
     dialog.open({ directory: true }).then((path) => {
       console.log(path)
       if (path) {
-        invoke('extract_dumpfile', {
-          path: file.value,
-          saveDir: path,
+        invoke('dumpfile_save_as', {
+          savePath: path,
           dbList: selection.value,
         })
       }

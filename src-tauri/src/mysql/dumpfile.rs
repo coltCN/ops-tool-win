@@ -10,6 +10,11 @@ use std::{
 use anyhow::{anyhow, Result};
 use regex::Regex;
 
+lazy_static! {
+  static ref RE: Regex = Regex::new(r"^-- Current Database: `(.*)`").unwrap();
+  static ref TMP_PATH: &'static Path = Path::new("./dump_tmp/");
+}
+
 pub struct Dumpfile {
   reader: Box<dyn BufRead>,
 }
@@ -17,7 +22,7 @@ pub struct Dumpfile {
 impl Dumpfile {
   pub fn new(file: &str) -> Result<Self> {
     let path = Path::new(file);
-    println!("当前文件扩展名: {:?}", path.extension());
+    // println!("当前文件扩展名: {:?}", path.extension());
     let file = fs::File::open(path).expect("file not found!");
     match path.extension() {
       Some(ext) if ext == "sql" => {
@@ -40,9 +45,6 @@ impl Dumpfile {
   pub fn extract(&mut self, save_path: &str, db_list: Vec<String>) -> Result<()> {
     // let reader = BufReader::new(file);
 
-    lazy_static! {
-      static ref RE: Regex = Regex::new(r"^-- Current Database: `(.*)`").unwrap();
-    }
     let mut writer_warp: Option<Box<BufWriter<File>>> = None;
     let mut buf = vec![];
     loop {
@@ -78,10 +80,6 @@ impl Dumpfile {
   pub fn list_db(&mut self) -> Result<Vec<String>> {
     let mut dbs = Vec::new();
 
-    lazy_static! {
-      static ref RE: Regex = Regex::new(r"^-- Current Database: `(.*)`").unwrap();
-    }
-
     let mut buf = vec![];
     loop {
       buf.clear();
@@ -92,7 +90,7 @@ impl Dumpfile {
         if buf.starts_with(b"-") {
           if let Ok(line) = str::from_utf8(buf.as_slice()) {
             if let Some(cap) = RE.captures(&line) {
-              println!("\n找到数据库: {}", cap[1].to_string());
+              println!("找到数据库: {}", cap[1].to_string());
               dbs.push(cap[1].to_string());
             }
           } else {
@@ -108,15 +106,12 @@ impl Dumpfile {
   pub fn list_extract_dbs(&mut self) -> Result<Vec<String>> {
     let mut dbs = Vec::new();
 
-    lazy_static! {
-      static ref RE: Regex = Regex::new(r"^-- Current Database: `(.*)`").unwrap();
-    }
     // 创建临时目录
-    let tmp_path = Path::new("./dump_tmp");
-    if tmp_path.exists() {
-      fs::remove_dir_all(tmp_path)?;
+    if TMP_PATH.exists() {
+      fs::remove_dir_all(*TMP_PATH)?;
     }
-    fs::create_dir("./dump_tmp")?;
+    // println!("{:?}", &*TMP_PATH);
+    fs::create_dir(*TMP_PATH)?;
 
     let mut writer_warp: Option<Box<BufWriter<File>>> = None;
     let mut buf = vec![];
@@ -129,9 +124,9 @@ impl Dumpfile {
         if buf.starts_with(b"-") {
           if let Ok(line) = str::from_utf8(buf.as_slice()) {
             if let Some(cap) = RE.captures(&line) {
-              println!("\n找到数据库: {}", cap[1].to_string());
+              println!("找到数据库: {}", cap[1].to_string());
               dbs.push(cap[1].to_string());
-              let out_file = fs::File::create(tmp_path.join(format!("{}.sql", &cap[1])))?;
+              let out_file = fs::File::create(TMP_PATH.join(format!("{}.sql", &cap[1])))?;
               let writer = BufWriter::new(out_file);
               writer_warp = Some(Box::new(writer));
             }
@@ -145,6 +140,19 @@ impl Dumpfile {
     }
     Ok(dbs)
   }
+}
+/// 另存为，对已提取到临时目录的文件另存为
+pub fn save_as(save_path: &str, db_list: Vec<String>) -> Result<()> {
+  let save_path = Path::new(save_path);
+  // println!("另存到: {:?}", save_path,);
+  for db in db_list {
+    let file_path = TMP_PATH.join(format!("{}.sql", &db));
+    if file_path.exists() {
+      fs::copy(file_path, save_path.join(format!("{}.sql", &db)))?;
+    }
+  }
+
+  Ok(())
 }
 
 #[cfg(test)]

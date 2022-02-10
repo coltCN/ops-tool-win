@@ -19,6 +19,10 @@ fn list_extract_dbs(path: &str) -> Result<Vec<String>, String> {
   let mut dump = Dumpfile::new(path).unwrap();
   dump.list_extract_dbs().map_err(|e| e.to_string())
 }
+#[tauri::command(async)]
+fn dumpfile_save_as(save_path: &str, db_list: Vec<String>) -> Result<(), String> {
+  mysql::save_as(save_path, db_list).map_err(|e| e.to_string())
+}
 #[tauri::command]
 fn extract_dumpfile(path: &str, save_dir: &str, db_list: Vec<String>) -> Result<(), String> {
   let mut dump = Dumpfile::new(path).unwrap();
@@ -32,6 +36,7 @@ fn main() {
       list_db,
       extract_dumpfile,
       list_extract_dbs,
+      dumpfile_save_as,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
