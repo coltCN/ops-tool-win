@@ -1,7 +1,29 @@
-# Vue 3 + Vite
+# 运维工具箱
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+基于 Rust + Tauri + Vue3 + Element-Plus 编写的练手项目
 
-## Recommended IDE Setup
+#### 目前实现功能
 
-- [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar)
+- 对 MySQL Dump 文件进行提取，支持未压缩文件(.sql) 和 gzip 压缩文件(.gz)
+
+### 编译
+
+#### 需求
+
+```
+Rust
+Nodejs
+Yarn
+```
+
+#### dev 运行
+
+```sh
+yarn tauri dev
+```
+
+#### 打包
+
+```sh
+yarn tauri build
+```
